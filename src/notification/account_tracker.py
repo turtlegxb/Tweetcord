@@ -7,13 +7,12 @@ from datetime import datetime, timezone, timedelta
 import aiosqlite
 import discord
 from discord.ext import commands
-from tweety import Twitter
-
 from configs.load_configs import configs
 from src.log import setup_logger
 from src.notification.display_tools import gen_embed, get_action
 from src.notification.get_tweets import get_tweets
 from src.notification.utils import is_match_media_type, is_match_type, replace_emoji
+from src.twitter_auth import authenticate_twitter_account
 from src.utils import get_accounts, get_lock, get_utcnow
 from src.db_function.readonly_db import connect_readonly
 from src.db_function.init_db import init_latest_tweet_on_startup
@@ -52,12 +51,10 @@ class AccountTracker():
         await self.timestamps_ready.wait()
 
         async def authenticate_account(account_name, account_token):
-            app = Twitter(account_name)
             max_attempts = configs['auth_max_attempts']
             for attempt in range(max_attempts):
                 try:
-                    await app.load_auth_token(account_token)
-                    return app
+                    return await authenticate_twitter_account(account_name, account_token, reuse_session=True)
                 except Exception as e:
                     log.error(f"authentication failed for account: {account_name} [Attempt {attempt + 1}/{max_attempts}]")
                     if attempt < max_attempts - 1:
@@ -206,7 +203,7 @@ class AccountTracker():
                             if not isinstance(e, discord.errors.Forbidden):
                                 log.error(f'an error occurred at {channel.mention} while sending notification: {e}')
 
-    async def tweetsUpdater(self, app: Twitter):
+    async def tweetsUpdater(self, app):
         updater_name = asyncio.current_task().get_name().split('_', 1)[1]
         while True:
             try:

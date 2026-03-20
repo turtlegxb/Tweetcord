@@ -105,7 +105,7 @@ def check_env():
         return False
 
     twitter_token = os.getenv('TWITTER_TOKEN')
-    if not all([(lambda e : len(e) == 2 and all(e))(entry.split(':')) for entry in twitter_token.split(',')]):
+    if not all([(lambda e: len(e) == 2 and all(e))(entry.split(':', 1)) for entry in twitter_token.split(',')]):
         log.error('invalid TWITTER_TOKEN format, must be in the form of "account_name:twitter_token"')
         return False
 
@@ -121,7 +121,7 @@ async def check_db() -> set[str]:
             row = await cursor.fetchall()
             
     db_clients = set(client[0] for client in row)
-    env_clients = set(entry.split(':')[0] for entry in twitter_token.split(','))
+    env_clients = set(entry.split(':', 1)[0] for entry in twitter_token.split(','))
     invalid_clients = db_clients - env_clients
     
     return invalid_clients

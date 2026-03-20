@@ -29,7 +29,7 @@ def str_to_bool(string: str):
 
 def get_accounts():
     accounts_str = os.getenv('TWITTER_TOKEN').strip(",")
-    accounts = {account.split(':')[0]: account.split(':')[1] for account in accounts_str.split(',')}  # accounts_str = 'username:token,username:token'
+    accounts = {account.split(':', 1)[0]: account.split(':', 1)[1] for account in accounts_str.split(',')}  # accounts_str = 'username:token,username:token'
     return accounts
 
 

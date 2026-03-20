@@ -3,8 +3,6 @@ import aiosqlite
 import discord
 from discord import app_commands
 from discord.ext import commands
-from tweety import Twitter
-
 from configs.load_configs import configs
 from core.classes import Cog_Extension
 from src.discord_ui.fetch_tracked_channels import fetch_tracked_channels
@@ -13,6 +11,7 @@ from src.log import setup_logger
 from src.notification.account_tracker import AccountTracker
 from src.permission import ADMINISTRATOR
 from src.db_function.readonly_db import connect_readonly
+from src.twitter_auth import authenticate_twitter_account
 from src.utils import get_accounts, get_lock, get_utcnow, validate_and_normalize_language
 from src.presence_updater import update_presence
 
@@ -63,8 +62,7 @@ class Notification(Cog_Extension):
             db.row_factory = aiosqlite.Row
             async with db.cursor() as cursor:
                 try:
-                    app = Twitter(account_used)
-                    await app.connect()
+                    app = await authenticate_twitter_account(account_used)
                     try:
                         new_user = await app.get_user_info(username)
                     except Exception:
@@ -96,8 +94,7 @@ class Notification(Cog_Extension):
                                 if configs['auto_change_client']:
                                     if configs['auto_unfollow'] or configs['auto_turn_off_notification']:
                                         old_client_used = match_user['client_used']
-                                        old_app = Twitter(old_client_used)
-                                        await app.connect()
+                                        old_app = await authenticate_twitter_account(old_client_used)
                                         target_user = await old_app.get_user_info(username)
 
                                         if configs['auto_unfollow']:
@@ -195,8 +192,7 @@ class Notification(Cog_Extension):
                                 await cursor.execute('SELECT client_used FROM user WHERE id = ?', (match_notifier['user_id'],))
                                 result = await cursor.fetchone()
                                 client_used = result['client_used']
-                                app = Twitter(client_used)
-                                await app.connect()
+                                app = await authenticate_twitter_account(client_used)
                                 target_user = await app.get_user_info(username)
 
                                 if configs['auto_unfollow']:
