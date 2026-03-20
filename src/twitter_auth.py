@@ -2,9 +2,12 @@ from tweety import Twitter, constants
 from tweety.exceptions import DeniedLogin
 
 from src.log import setup_logger
+from src.tweety_compat import apply_tweety_compatibility_patch
 from src.utils import get_accounts
 
 log = setup_logger(__name__)
+
+apply_tweety_compatibility_patch()
 
 AUTH_BOOTSTRAP_URLS = (
     'https://x.com/',
