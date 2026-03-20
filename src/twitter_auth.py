@@ -45,8 +45,9 @@ async def authenticate_twitter_account(account_name: str, credential: str | None
 
     if reuse_session:
         try:
-            await app.connect()
-            return app
+            user = await app.connect()
+            if user is not None and app.me is not None:
+                return app
         except Exception as exc:
             log.warning(f'failed to reuse saved Tweety session for {account_name}: {exc}')
 

@@ -213,6 +213,16 @@ class AccountTracker():
                 # Handle the error thrown by `tweety-ns` mentioned in issue#59
                 log.warning(f"handled KeyError in {updater_name}: {e}. This is likely a temporary API response issue from Twitter. Skipping this check.")
             except Exception as e:
+                if 'authenticated and connected' in str(e).lower():
+                    log.warning(f'authentication state lost for {updater_name}, re-authenticating Tweety client')
+                    try:
+                        app = await authenticate_twitter_account(updater_name, self.accounts_data[updater_name], reuse_session=False)
+                        continue
+                    except Exception as auth_error:
+                        log.error(f'failed to re-authenticate {updater_name}: {auth_error}')
+                        log.error(f"an unexpected error occurred, try again in {configs['tweets_updater_retry_delay']} minutes")
+                        await asyncio.sleep(configs['tweets_updater_retry_delay'] * 60)
+                        continue
                 log.error(f'{e} (task : tweets updater {updater_name})')
                 log.error(f"an unexpected error occurred, try again in {configs['tweets_updater_retry_delay']} minutes")
                 await asyncio.sleep(configs['tweets_updater_retry_delay'] * 60)
