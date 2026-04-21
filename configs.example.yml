@@ -33,6 +33,11 @@ embed:
       enabled: false
       default_language: 'en'
 
+# MongoDB configuration (Optionally read from env variables MONGO_URI, MONGO_DB, MONGO_COLLECTION)
+mongodb:
+  database: 'wfreedom'
+  collection: 'tweets'
+
 default_message: |
   {mention}**{author}** just {action} here: 
   {url}

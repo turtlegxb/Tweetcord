@@ -16,6 +16,7 @@ from src.twitter_auth import authenticate_twitter_account
 from src.utils import get_accounts, get_lock, get_utcnow
 from src.db_function.readonly_db import connect_readonly
 from src.db_function.init_db import init_latest_tweet_on_startup
+from src.db_function.mongo_client import save_tweet_to_mongo
 
 EMBED_TYPE: str = configs['embed']['type']
 SERVICE: str = configs['embed']['proxy']['service']
@@ -161,6 +162,7 @@ class AccountTracker():
 
             for tweet in latest_tweets:
                 log.info(f'find a new tweet from {username}')
+                await save_tweet_to_mongo(tweet, username)
                 
                 view, create_view = None, False
                 if bool(tweet.media) and tweet.media[0].type == 'video' and EMBED_TYPE == 'built_in' and configs['embed']['built_in']['video_link_button']:
