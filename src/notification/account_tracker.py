@@ -162,8 +162,8 @@ class AccountTracker():
 
             for tweet in latest_tweets:
                 log.info(f'find a new tweet from {username}')
-                await save_tweet_to_mongo(tweet, username)
                 
+                matched_channel_ids = []
                 view, create_view = None, False
                 if bool(tweet.media) and tweet.media[0].type == 'video' and EMBED_TYPE == 'built_in' and configs['embed']['built_in']['video_link_button']:
                     create_view = True
@@ -179,6 +179,7 @@ class AccountTracker():
                 for data in notifications:
                     channel = self.bot.get_channel(int(data['channel_id']))
                     if channel is not None and is_match_type(tweet, data['enable_type']) and is_match_media_type(tweet, data['enable_media_type']):
+                        matched_channel_ids.append(int(data['channel_id']))
                         try:
                             url = tweet.url
                             if EMBED_TYPE == 'proxy':
@@ -204,6 +205,8 @@ class AccountTracker():
                         except Exception as e:
                             if not isinstance(e, discord.errors.Forbidden):
                                 log.error(f'an error occurred at {channel.mention} while sending notification: {e}')
+
+                await save_tweet_to_mongo(tweet, username, matched_channel_ids)
 
     async def tweetsUpdater(self, app):
         updater_name = asyncio.current_task().get_name().split('_', 1)[1]

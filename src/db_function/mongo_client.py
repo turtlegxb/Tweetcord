@@ -18,7 +18,7 @@ except Exception as e:
     log.error(f"Failed to initialize MongoDB client: {e}")
     tweets_collection = None
 
-async def save_tweet_to_mongo(tweet, username: str):
+async def save_tweet_to_mongo(tweet, username: str, channel_ids: list = None):
     """
     Saves a tweet object to MongoDB asynchronously.
     """
@@ -44,6 +44,7 @@ async def save_tweet_to_mongo(tweet, username: str):
             "url": tweet.url,
             "created_on": tweet.created_on,
             "media": media_urls,
+            "channel_ids": channel_ids or [],
             "is_retweet": tweet.is_retweet,
             "saved_at": datetime.datetime.now(datetime.timezone.utc)
         }
