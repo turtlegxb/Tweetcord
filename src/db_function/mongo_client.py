@@ -1,4 +1,5 @@
 import os
+import datetime
 import motor.motor_asyncio
 from src.log import setup_logger
 
@@ -44,7 +45,7 @@ async def save_tweet_to_mongo(tweet, username: str):
             "created_on": tweet.created_on,
             "media": media_urls,
             "is_retweet": tweet.is_retweet,
-            "saved_at": motor.motor_asyncio.datetime.datetime.now(motor.motor_asyncio.datetime.timezone.utc)
+            "saved_at": datetime.datetime.now(datetime.timezone.utc)
         }
 
         # Use update_one with upsert to avoid duplicates if the same tweet is fetched again
